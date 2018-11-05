@@ -11,6 +11,12 @@ java -Xmx15g -jar /hb/groups/corbettlab/DGN/gatk/gatk-package-4.0.10.1-local.jar
 # filename = NT_033779_5
 # range = 1-1000000
 def create_job_command(filename, range):
+    '''
+    DOCTSTRING
+    :param filename: chromosome name
+    :param range: steps of 1Mb starting from 0. I.e on first iteration it will be 0 up to 1Mb
+    :return: the slurm job format
+    '''
     filename2 = filename[0:9] + '_' + filename[-1]
     slurm_job = command.format(filename2, range, filename, range)
     return slurm_job
