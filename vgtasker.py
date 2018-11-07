@@ -26,23 +26,23 @@ def create_job_command(filename, range,dirname):
 
     slurm_job = command.format(filename2, range, filename, range)
     filename = filename[0:11] + '.' + str(range) + '.' + filename[-2:]
+    filename='/hb/groups/corbettlab/DGN/{}/{}'.format(dirname,filename)
     with open(filename,'w') as out:
         out.write(slurm_job)
-
         st = os.stat(filename)
         os.chmod(filename, st.st_mode | 0o111)
-    os.system('mv filename {} '.format(dirname))
+
 
 for line in open('intervals.txt'):
     split = line.split()
     length = int(split[1])
-    output_dir = split[:-1]
+    dirName = split[0].replace('.','_')
     filename = split[0]+'.sh'
 
-    print(output_dir)
+
     val = 0
     while val != length:
         newVal = min(val + 1000000, length)
         range = '{}-{}'.format(val + 1, newVal)
         val = newVal
-        create_job_command(filename, range,output_dir)
+        create_job_command(filename, range,dirName)
