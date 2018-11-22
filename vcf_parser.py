@@ -25,13 +25,10 @@ class chromosomeValue:
         :return:
         '''
         if c1 and c2:
-            print('case1',c1,c2,sep=',')
             self.Mcount+=2
         elif not c1 and not c2:
-            print('case2',c1, c2, sep=',')
             self.Rcount += 2
         else:
-            print('case3',c1, c2, sep=',')
             self.Rcount+=1
             self.Mcount+=1
     def total(self):
