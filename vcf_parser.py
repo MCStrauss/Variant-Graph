@@ -1,5 +1,7 @@
 from itertools import dropwhile
 db={}
+cc_count=0
+
 class chromosomeValue:
     Rcount=Mcount=0
     def init(self):
@@ -25,20 +27,22 @@ class chromosomeValue:
         :return:
         '''
         if c1 and c2:
-            self.Mcount+=2
+            self.Mcount+=1 #increment mutation count by 2
         elif not c1 and not c2:
-            self.Rcount += 2
+            self.Rcount += 1 #increment reference count by 2
         else:
-            self.Rcount+=1
-            self.Mcount+=1
+            self.Rcount+=1 #increment reference count by 1
+            self.Mcount+=1 #increment mutation count by 1
     def total(self):
-        #print(self.Mcount,self.Rcount,sep=',')
         return 'Mutation rate = {}'.format(self.Mcount/(self.Rcount+self.Mcount))
 
 def main():
+
     with open('vcf.txt') as f:
         for line in dropwhile(lambda x: x.startswith('#'),f):
             split=line.split()
+            global cc_count
+            if split[2]=='.': cc_count+=1
             name, position=split[0], split[1]
             key = (name, position)
 
@@ -46,6 +50,7 @@ def main():
                 value=chromosomeValue()
                 db[key]=value
 
+                print(cc_count)
             for sample in split[9:]:
                 if len(sample.split('|'))<2:
                     sample=sample.split('/')
@@ -58,7 +63,7 @@ if __name__=='__main__':
     main()
     for item in db.keys():
         print(item,db[item].total(),sep=': ')
-        
+
 
 
 
