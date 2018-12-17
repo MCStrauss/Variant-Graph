@@ -9,10 +9,10 @@ class chromosomeValue:
         return 'reference_count: {}, mutation_count: {}'.format(self.Rcount, self.Mcount)
 
     def __iter__(self):
-        return iter(self.Rcount,self.Mcount)
+        return iter(( self.Rcount, self.Mcount))
 
     def __getitem__(self, item):
-        return (self.Rcount,self.Mcount)[item]
+        return (self.Rcount, self.Mcount)[item]
 
     def find_count(self, c1 ,c2):
         '''
@@ -30,5 +30,6 @@ class chromosomeValue:
         else:
             self.Rcount += 1 #increment reference count by 1
             self.Mcount += 1 #increment mutation count by 1
+
     def total(self):
         return self.Mcount/(self.Rcount+self.Mcount)
