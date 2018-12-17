@@ -1,17 +1,19 @@
 from itertools import dropwhile
 from chromosome import chromosomeValue
 import argparse
-db={} #storage (chro. name, position): reference count, mutation count
-parser=argparse.ArgumentParser(description = 'Find the allele frequencies of '
-                                            'drosophilia flies from vcf files'
-                                             ' Example run: python3 vcf_parser.py .5')
+db={} #storage (chro. name, position): reference count, mutation count stored as an object in chromosome.py
+#accessed as val=chromsomeValue(): val.Mcount or val.Rcount
 
-parser.add_argument('-f', '--filter', type = float, metavar='', help = 'Cutoff to see if a variant is '
-                                                 'significant or not Please supply filter as a float'
-                                                   'for instance .5')
+parser=argparse.ArgumentParser(description = 'Find the allele frequencies of '
+                                             'drosophilia flies from vcf files '
+                                             'Example run: python3 vcf_parser.py .5')
+
+parser.add_argument('filter', type = float, metavar='', help = 'filter: Cutoff to see if a variant is '
+                                                               'significant or not Please supply filter as a float'
+                                                               'for instance .5')
 args = parser.parse_args()
-if args.filter>1:
-    raise Exception('Filter should not exceed 1, the filter was {}'.format(args.filter))
+assert 0 <= args.filter <= 1,  ('Filter value should not be below 0 or exceed 1')
+
 
 def main():
     with open('vcf.txt') as f:
@@ -39,6 +41,7 @@ if __name__=='__main__':
     main()
     for item in db.keys():
         print(item,db[item].total(),sep=': ')
+
 
 
 
