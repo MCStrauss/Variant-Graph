@@ -35,9 +35,6 @@ for line in open('intervals.txt'):
     chromosome = split[0]
 
     directory = chromosome[0:9] + '_' + chromosome[10]
-    #if os.path.exists(directory):  #should be commented out when we put on hummmingbird or github
-     #   shutil.rmtree(directory)  #should be commented out
-    #os.mkdir(directory)            #should be commented out
 
     lower_range = 0
     file_counter = 1
@@ -46,5 +43,5 @@ for line in open('intervals.txt'):
         range = '{}-{}'.format(lower_range + 1, upper_range)
         lower_range = upper_range
         create_job_command(file_counter, directory,range)
-        #create_job_command(file_counter,chromosome directory, range)
+
         file_counter += 1
