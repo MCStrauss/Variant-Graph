@@ -12,8 +12,8 @@ alt_freq = {} #holds sample: namedtuple Allfreq
 history  = deque(maxlen = 2)
 
 def main():
-    check = 0
     DP = AD = 0
+
     for record in vcf_reader:
         key = (record.CHROM, record.POS)
         alt_freq[key] = {}
@@ -27,7 +27,8 @@ def main():
 
             if sample != history[0]:
                 DP = AD = 0
-            check += 1
+
+
             try:
                 DP += call['DP']
                 AD += int(call['AD'][0])
@@ -39,9 +40,8 @@ def main():
                         alt_freq[key][sample].update(DP, AD)
                         #print(key, sample, alt_freq[key][sample].DP, alt_freq[key][sample].AD)
             except TypeError: #avoids getting edgecase where DP = None and thus adding int + Nonetype throws error
-                DP = AD = 0
-            #if check>8:
-             #   break
+                pass
+
 
 
 def check():
@@ -71,22 +71,3 @@ if __name__ == '__main__':
             out.write('\n')
     check()
 
-
-
-'''
- history.append(sample)
-
-            if sample != history[0]:
-                try:
-                    if sample not in alt_freq[(record.CHROM, record.POS)]:
-                        alt_freq[(record.CHROM, record.POS)][sample] = Frequency(DP, AD, (DP - AD) / DP)
-                    else:
-                        alt_freq[(record.CHROM, record.POS)][sample].update(DP, AD)
-
-                except ZeroDivisionError:
-                    pass
-                    # alt_freq[sample] = Frequency(DP, AD, 0)
-
-                DP = AD = 0
-
-'''
