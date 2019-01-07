@@ -12,6 +12,7 @@ alt_freq = {} #holds sample: namedtuple Allfreq
 history  = deque(maxlen = 2)
 
 def main():
+
     DP = AD = 0
 
     for record in vcf_reader:
@@ -32,13 +33,13 @@ def main():
             try:
                 DP += call['DP']
                 AD += int(call['AD'][0])
-                #print(key, sample, DP, AD)
+
                 if DP and AD:
                     if sample not in alt_freq[key]:
                         alt_freq[key][sample] = Frequency(DP, AD, (DP - AD) / DP)
                     else:
                         alt_freq[key][sample].update(DP, AD)
-                        #print(key, sample, alt_freq[key][sample].DP, alt_freq[key][sample].AD)
+
             except TypeError: #avoids getting edgecase where DP = None and thus adding int + Nonetype throws error
                 pass
 
@@ -63,11 +64,14 @@ def check():
 
 if __name__ == '__main__':
     main()
+    filter = 0.05 #put in by hand for testing
     with open('output.txt', 'w') as out:
         for key, value in alt_freq.items():
             out.write(f'sample_name - {key}')
             for val in value.items():
-                out.write(f'{val}'.center(10,' '))
+                if val[1].AF  > filter:
+                    out.write(f'{val}'.center(10,' '))
+
             out.write('\n')
     check()
 
