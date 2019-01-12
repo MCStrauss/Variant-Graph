@@ -1,3 +1,4 @@
+#Frequency object will be used to store the reference count, alternative count, and the minor allelic frequency
 class Frequency:
 
     def __init__(self, ref = 0, alt = 0):

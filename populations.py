@@ -1,3 +1,5 @@
+#dictionary  used to support generating our population data
+#todo double check which samples we want grouped together and make sure that every sample has a function
 populations = { lambda x: x[0].isdigit(): 'North America',
                 lambda x: x.startswith('B'): 'China',
                 lambda x: x.startswith('C'): 'Africa',
