@@ -2,11 +2,9 @@ import os
 import stat
 import shutil
 
-shebang = '#!/bin/bash'
 command = \
 """
 #!/bin/bash
-
 java -Xmx15g -jar /hb/groups/corbettlab/DGN/gatk/gatk-package-4.0.10.1-local.jar GenomicsDBImport \\
 --sample-name-map /hb/groups/corbettlab/DGN/sample_map.txt \\
 --reader-threads 20 \\
@@ -49,4 +47,4 @@ for line in open('intervals.txt'):
         range = '{}-{}'.format(lower_range + 1, upper_range)
         lower_range = upper_range
         create_job_command(file_counter, chromosome, directory, range)
-        file_counter += 1
+        file_counter += 1import os

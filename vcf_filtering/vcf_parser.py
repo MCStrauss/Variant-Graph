@@ -13,7 +13,7 @@ parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local
                     'If a read has no sample with greater than x%% then '
                     'it is removed \n from the vcf. ', type = float)
 
-parser.add_argument('-p', '--population', help = 'If -p is specified an outpout file with population and '
+parser.add_argument('-p', '--population', help = 'If -p is specified an output file with population and '
                                                  'their minor allelic frequencies is outputed', action = 'store_true')
 args = parser.parse_args()
 
@@ -22,10 +22,8 @@ def check():
     if args.allelic_frequency: assert 0 <= args.allelic_frequency < 1, 'allelic_frequency must be atleast 0 and greater than 1'
 
 class Parser:
-
     def __init__(self, vcf_reader, f_aan = .5, f_maf = .05):
         '''
-
         :param vcf_reader: the vcf file we will be iterating over
         :param f_aan: cutoff for mininum number of alleles
         :param f_maf: cutoff for minor allelic frequency

@@ -1,0 +1,88 @@
+NC_004353_4/genomic_database_1-1000000
+NC_004353_4/genomic_database_1000001-1348131
+NC_004354_4/genomic_database_1-1000000
+NC_004354_4/genomic_database_1000001-2000000
+NC_004354_4/genomic_database_10000001-11000000
+NC_004354_4/genomic_database_11000001-12000000
+NC_004354_4/genomic_database_12000001-13000000
+NC_004354_4/genomic_database_13000001-14000000
+NC_004354_4/genomic_database_14000001-15000000
+NC_004354_4/genomic_database_15000001-16000000
+NC_004354_4/genomic_database_16000001-17000000
+NC_004354_4/genomic_database_17000001-18000000
+NC_004354_4/genomic_database_18000001-19000000
+NC_004354_4/genomic_database_19000001-20000000
+NC_004354_4/genomic_database_20000001-21000000
+NC_004354_4/genomic_database_2000001-3000000
+NC_004354_4/genomic_database_21000001-22000000
+NC_004354_4/genomic_database_22000001-23000000
+NC_004354_4/genomic_database_23000001-23542271
+NC_004354_4/genomic_database_3000001-4000000
+NC_004354_4/genomic_database_4000001-5000000
+NC_004354_4/genomic_database_5000001-6000000
+NC_004354_4/genomic_database_6000001-7000000
+NC_004354_4/genomic_database_7000001-8000000
+NC_004354_4/genomic_database_8000001-9000000
+NC_004354_4/genomic_database_9000001-10000000
+
+
+
+
+
+
+
+
+
+                           genomic_database_10000001-11000000
+20.sh         44622_23.out  genomic_database_1000001-2000000
+21.sh         44622_24.err  genomic_database_1-1000000
+22.sh         44622_2  genomic_database_11000001-12000000
+23.sh         44622_25.err  genomic_database_12000001-13000000
+24.sh         44622_25.out  genomic_database_13000001-14000000
+25.sh         44622_26.err  genomic_database_14000001-15000000
+26.sh         44622_26.out  genomic_database_15000001-16000000
+27.sh         44622_27.err  genomic_database_16000001-17000000
+28.sh         44622_27.out  genomic_database_17000001-18000000
+29.sh         44622_28.err  genomic_database_18000001-19000000
+2.sh          44622_28.out  genomic_database_19000001-20000000
+30.sh         44622_29.err  genomic_database_20000001-21000000
+31.sh         44622_29.out  genomic_database_2000001-3000000
+32.sh         44622_2.err   genomic_database_21000001-22000000
+33.sh         44622_2.out   genomic_database_22000001-23000000
+3.sh          44622_30.err  genomic_database_23000001-24000000
+ 44622_30.out  genomic_database_24000001-25000000
+44622_10.out  44622_31.err  genomic_database_25000001-26000000
+44622_11.err  44622_31.out  genomic_database_26000001-27000000
+44622_11.out  44622_32.err  genomic_database_27000001-28000000
+44622_12.err  44622_32.out  genomic_database_28000001-29000000
+44622_12.out  44622_33.err  genomic_database_29000001-30000000
+44622_13.err  44622_33.out  genomic_database_30000001-31000000
+44622_13.out  44622_3.err   genomic_database_3000001-4000000
+44622_14.err  44622_3.out   genomic_database_31000001-32000000
+44622_1  44622_4.err   genomic_database_32000001-32079331
+44622_15.err  44622_   genomic_database_4000001-5000000
+44622_15.out  44622_5.err   genomic_database_5000001-6000000
+44622_16.err  44622_5.out   genomic_database_6000001-7000000
+44622_16.out  44622_6.err   genomic_database_7000001-8000000
+44622_17.err  44622_6.out   genomic_database_8000001-9000000
+44622_17.out  44622_7.err   genomic_database_9000001-10000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
