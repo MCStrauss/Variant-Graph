@@ -47,4 +47,4 @@ for line in open('intervals.txt'):
         range = '{}-{}'.format(lower_range + 1, upper_range)
         lower_range = upper_range
         create_job_command(file_counter, chromosome, directory, range)
-        file_counter += 1import os
+        file_counter += import os
