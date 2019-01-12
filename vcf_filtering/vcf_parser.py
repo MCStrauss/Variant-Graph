@@ -125,3 +125,18 @@ if __name__ == '__main__':
     parse.gen_pop_data()
     parse.generate_filtered_vcf()
     if args.population: parse.write_pop_data()
+    '''
+    Analysis of runtime: generating our database based on populations takes O(n * m * 18) where 
+    n = number of row and m = number of columns. The constant 18 comes from populations.py, at worst to find the populations
+    our for loop will have to execute the entire way through (however this will almost never happen).
+    
+    Generating the new vcf requires us to make another pass through the original vcf and compare it to the data we generated. So we must again 
+    go through each line of the vcf (n) and then walk through every chromosome in our database by population (m). So another n*m.
+    
+    Our approximate runtime is therefore O(2n * 2m) = O(n*m).
+    
+    Storage:
+    Since we are using generators to iterate over the file our memory is being consumed by our database which hold every population and chromosome
+    so O(n*m) storage. When generating the new vcf we also take into one line to check the an value however it is constant so O(1) storage.
+     
+    '''
