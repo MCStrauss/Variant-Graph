@@ -3,7 +3,7 @@ import argparse
 from collections import namedtuple, defaultdict
 from count import Frequency
 from populations import populations
-
+#filter on fs
 chromosome = namedtuple('chromosome', ['chrom', 'position'])
 
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
@@ -15,6 +15,9 @@ parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local
 
 parser.add_argument('-p', '--population', help = 'If -p is specified an output file with population and '
                                                  'their minor allelic frequencies is outputed', action = 'store_true')
+parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
+                                                       'if it is less than the cutoff it will not be included in the filtered vcf')
+
 args = parser.parse_args()
 
 def check():
@@ -58,7 +61,9 @@ class Parser:
         :return: returns nothing, this generates our dB,
         '''
         for record in vcf_reader:
+
             chrom = chromosome(record.CHROM, record.POS)
+            aaf = max(record.aaf)
 
             for sample in record.samples:
                 x, y = self.parse(sample['GT'])
@@ -69,7 +74,7 @@ class Parser:
                             self.dB[key][chrom].update(ref = x, alt = y) #already in the dB
                             break
                         else:
-                            self.dB[key][chrom] = Frequency(ref = x, alt = y) #needs to be initialized in the dB
+                            self.dB[key][chrom] = Frequency(aaf, ref = x, alt = y) #needs to be initialized in the dB
                             break
         return
 
@@ -82,26 +87,32 @@ class Parser:
             for key, value in self.dB.items():
                 out.write(f'{key}, {value}\n')
 
-    def filter_ANN(self, line):
+    def filter_AN_FS(self, line):
         '''
         :param line: a row in a vcf file
         :return:  if the an doesn't have the desired number of samples we want remove the row from our new vcf file.
         '''
+        #todo filter on fs
+        fs = eval(''.join([x for x in line.split(';')[5:7] if x.startswith('FS')]).split('=')[1]) #grabs fischer strand
         an = eval(line.split(';')[2].split('=')[1])  # grabs the an from the line
+
         if (an / 2) / 1070 < self.f_aan: #1070 is the total number of samples, an represents the number of chromosomes in the record
             return False
         return True
 
-    def filter_local_frequency(self,chrom):
+    def filter_frequency(self,chrom):
         '''
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
         for population in self.dB:
-            if chrom in self.dB[population]: #haven't seen this yet but its here to prevent edge case where the a population doesn't have a read on a chromosome, remove this line and we will get a KeyError otherwise
-                if self.dB[population][chrom].freq >= self.f_maf:
+            if chrom in self.dB[population]: # haven't seen this yet but its here to prevent edge case where the a population
+                # doesn't have a read on a chromosome, remove this line and we will get a KeyError otherwise
+                loc_freq, glob_freq = self.dB[population][chrom].freq, self.dB[population][chrom].aaf
+                if loc_freq >= self.f_maf or glob_freq >= self.f_maf :
                     return True
         return False
+
 
     def generate_filtered_vcf(self, name = 'new_vcf.txt'):
         '''
@@ -114,8 +125,10 @@ class Parser:
                 if line.startswith('#'):
                     out.write(f'{line}')
                 else:
-                    split = line.split('\t')
-                    if self.filter_ANN(split[7]) and self.filter_local_frequency((split[0],eval(split[1]))): #gets chrom name as string and position as int
+                    split = line.split('\t') #fischer strand
+                    chrom = split[0], eval(split[1])
+
+                    if self.filter_AN_FS(split[7]) and self.filter_frequency(chrom): #gets chrom name as string and position as int
                         out.write(f'{line}')
 
 if __name__ == '__main__':
@@ -125,6 +138,7 @@ if __name__ == '__main__':
     parse.gen_pop_data()
     parse.generate_filtered_vcf()
     if args.population: parse.write_pop_data()
+
     '''
     Analysis of runtime: generating our database based on populations takes O(n * m * 18) where 
     n = number of row and m = number of columns. The constant 18 comes from populations.py, at worst to find the populations

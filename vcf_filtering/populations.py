@@ -1,30 +1,38 @@
 #dictionary  used to support generating our population data
 #todo double check which samples we want grouped together and make sure that every sample has a function
+#exclude Cairo 'EG'
+#include GA under georgia North America
+#Gabon goes to Africa
+#include lower_t and lower_w in global but exclude from populations
+#uganda Tanzania <- Africa
+#Zimbabwe is other Africa
+#make Europe a population group
+
 populations = { lambda x: x[0].isdigit(): 'North America',
                 lambda x: x.startswith('B'): 'China',
-                lambda x: x.startswith('C'): 'Africa',
+                lambda x: x.startswith('C'): 'Other Africa',
                 lambda x: x.startswith('E'): 'Ethiopa',
-                lambda x: x.startswith('F'): 'France',
-                lambda x: x.startswith('G'): 'Georgia',
-                lambda x: x.startswith('H'): 'Haiti',
-                lambda x: x.startswith('I'): 'Ithaca NY',
-                lambda x: x.startswith('K'): 'Kenya',
-                lambda x: x.startswith('N'): 'Netherlands',
-                lambda x: x.startswith('RAL'): 'Raleigh North Carolina',
-                lambda x: x.startswith('RC'): 'Rwanda',
-                lambda x: x.startswith('RA'): 'Rwanda',
-                lambda x: x.startswith('S'): 'South Africa',
-                lambda x: x.startswith('T'): 'Australia',
-                lambda x: x.startswith('W'): 'California',
-                lambda x: x.startswith('ZH') : 'Zimbabwe',
-                lambda x: x.startswith('ZK'): 'Zimbabwe',
-                lambda x: x.startswith('ZS'): 'Zimbabwe',
-                lambda x: x.startswith('ZW'): 'Zimbabwe',
-                lambda x: x.startswith('ZI') : 'Zambia',
-                lambda x: x.startswith('ZL'): 'Zambia',
-                lambda x: x.startswith('ZO'): 'Zambia',
+                lambda x: x.startswith('F'): 'Europe',
+                lambda x: x.startswith('G'): 'North America',
+                lambda x: x.startswith('H'): 'North America',
+                lambda x: x.startswith('I'): 'North America',
+                lambda x: x.startswith('K'): 'Other Africa',
+                lambda x: x.startswith('N'): 'Europe',
+                lambda x: x.startswith('RAL'): 'North America',
+                lambda x: x.startswith('RC'): 'Other Africa',
+                lambda x: x.startswith('RA'): 'Other Africa',
+                lambda x: x.startswith('S'): 'Southern Africa',
+                #lambda x: x.startswith('T'): 'Australia',
+                lambda x: x.startswith('W'): 'North America',
+                lambda x: x.startswith('ZH') : 'Other Africa',
+                lambda x: x.startswith('ZK'): 'Other Africa',
+                lambda x: x.startswith('ZS'): 'Other Africa',
+                lambda x: x.startswith('ZW'): 'Other Africa',
+                lambda x: x.startswith('ZI') : 'Southern Africa',
+                lambda x: x.startswith('ZL'): 'Southern Africa',
+                lambda x: x.startswith('ZO'): 'Southern Africa',
                 lambda x: x.startswith('b'): 'China',
-                lambda x: x.startswith('t'): 'lower_t',
-                lambda x: x.startswith('w'): 'lower_w',
+                #lambda x: x.startswith('t'): 'lower_t',
+                #lambda x: x.startswith('w'): 'lower_w',
 }
 
