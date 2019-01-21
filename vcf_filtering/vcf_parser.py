@@ -86,7 +86,11 @@ class Parser:
         '''
         with open(name, 'w') as out:
             for key, value in self.dB.items():
-                out.write(f'{key}, {value}\n')
+                out.write(f'{key}\t')
+                for chrom, freq in value.items():
+                    out.write(f'{chrom.chrom}\t{chrom.position}\t{freq}\t' )
+                out.write('\n')
+
 
     def filter_AN_FS(self, line):
         '''
@@ -101,7 +105,7 @@ class Parser:
             return False
         return True
 
-    def filter_frequency(self,chrom):
+    def filter_frequency(self, chrom):
         '''
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
