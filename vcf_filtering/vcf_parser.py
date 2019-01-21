@@ -18,6 +18,7 @@ parser.add_argument('-p', '--population', help = 'If -p is specified an output f
 parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
                                                        'if it is less than the cutoff it will not be included in the filtered vcf')
 
+
 args = parser.parse_args()
 
 def check():
