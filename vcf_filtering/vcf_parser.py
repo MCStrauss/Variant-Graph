@@ -84,11 +84,13 @@ class Parser:
         :param name: name for the text file the user wants the population data in
         :return: A text file that displays the population: and the minor alellic frequency at each chromosome.
         '''
+
         with open(name, 'w') as out:
             for key, value in self.dB.items():
                 out.write(f'{key}\t')
                 for chrom, freq in value.items():
-                    out.write(f'{chrom.chrom}\t{chrom.position}\t{freq}\t' )
+                    if freq.freq > self.f_maf  or freq.gaaf > .05:
+                        out.write(f'{chrom.chrom}\t{chrom.position}\t{freq}\t' )
                 out.write('\n')
 
 
@@ -113,7 +115,7 @@ class Parser:
         for population in self.dB:
             if chrom in self.dB[population]: # haven't seen this yet but its here to prevent edge case where the a population
                 # doesn't have a read on a chromosome, remove this line and we will get a KeyError otherwise
-                loc_freq, glob_freq = self.dB[population][chrom].freq, self.dB[population][chrom].aaf
+                loc_freq, glob_freq = self.dB[population][chrom].freq, self.dB[population][chrom].gaaf
                 if loc_freq >= self.f_maf or glob_freq >= self.f_maf :
                     return True
         return False
