@@ -5,7 +5,7 @@ from count import Frequency
 from populations import populations
 #filter on fs
 chromosome = namedtuple('chromosome', ['chrom', 'position'])
-
+fs_filter = 10 #default filter value for fischer strand
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
 parser.add_argument('-an', '--an_cutoff', help = 'AN count must represent certain %% of total', type = float)
 
@@ -18,13 +18,14 @@ parser.add_argument('-p', '--population', help = 'If -p is specified an output f
 parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
                                                        'if it is less than the cutoff it will not be included in the filtered vcf')
 
-
+parser.add_argument('-fs', '--fischer_strand', help = 'value to filter fischer strand on, if the fischer strand on an '
+                                                      'chromosome is larger than the fs, it will be filtered out', type  = int)
 args = parser.parse_args()
 
 def check():
     if args.an_cutoff: assert 0 <= args.an_cutoff < 1, 'an_cutoff must be atleast 0 and greater than 1'
     if args.allelic_frequency: assert 0 <= args.allelic_frequency < 1, 'allelic_frequency must be atleast 0 and greater than 1'
-
+    if args.fischer_strand: assert args.fischer_strand > 0 , 'fischer strand filter must be greater than 0'
 class Parser:
     def __init__(self, vcf_reader, f_aan = .5, f_maf = .05):
         '''
@@ -103,7 +104,7 @@ class Parser:
         fs = eval(''.join([x for x in line.split(';')[5:7] if x.startswith('FS')]).split('=')[1]) #grabs fischer strand
         an = eval(line.split(';')[2].split('=')[1])  # grabs the an from the line
 
-        if (an / 2) / 1070 < self.f_aan: #1070 is the total number of samples, an represents the number of chromosomes in the record
+        if (an / 2) / 1070 < self.f_aan and fs < fs_filter: #1070 is the total number of samples, an represents the number of chromosomes in the record
             return False
         return True
 
@@ -145,6 +146,8 @@ if __name__ == '__main__':
     parse.gen_pop_data()
     parse.generate_filtered_vcf()
     if args.population: parse.write_pop_data()
+    if args.fischer_strand:
+        fs_filter  = args.fischer_strand
 
     '''
     Analysis of runtime: generating our database based on populations takes O(n * m * 18) where 
