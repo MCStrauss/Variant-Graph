@@ -3,7 +3,7 @@ import argparse
 from collections import namedtuple, defaultdict
 from count import Frequency
 from populations import populations
-#filter on fs
+
 chromosome = namedtuple('chromosome', ['chrom', 'position'])
 fs_filter = 10 #default filter value for fischer strand
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
@@ -26,6 +26,7 @@ def check():
     if args.an_cutoff: assert 0 <= args.an_cutoff < 1, 'an_cutoff must be atleast 0 and greater than 1'
     if args.allelic_frequency: assert 0 <= args.allelic_frequency < 1, 'allelic_frequency must be atleast 0 and greater than 1'
     if args.fischer_strand: assert args.fischer_strand > 0 , 'fischer strand filter must be greater than 0'
+
 class Parser:
     def __init__(self, vcf_reader, f_aan = .5, f_maf = .05):
         '''
