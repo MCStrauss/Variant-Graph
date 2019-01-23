@@ -4,6 +4,9 @@ from collections import namedtuple, defaultdict
 from count import Frequency
 from populations import populations
 
+#todo bash script that makes directories and puts vcf's into each one
+#todo put the filitered vcf's into each directories and each directories corresponds to the filter parameters
+
 chromosome = namedtuple('chromosome', ['chrom', 'position'])
 fs_filter = 10 #default filter value for fischer strand
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
@@ -95,7 +98,6 @@ class Parser:
                         out.write(f'{chrom.chrom}\t{chrom.position}\t{freq}\t' )
                 out.write('\n')
 
-
     def filter_AN_FS(self, line):
         '''
         :param line: a row in a vcf file
@@ -105,7 +107,7 @@ class Parser:
         fs = eval(''.join([x for x in line.split(';')[5:7] if x.startswith('FS')]).split('=')[1]) #grabs fischer strand
         an = eval(line.split(';')[2].split('=')[1])  # grabs the an from the line
 
-        if (an / 2) / 1070 < self.f_aan and fs < fs_filter: #1070 is the total number of samples, an represents the number of chromosomes in the record
+        if (an / 2) / 1070 < self.f_aan or fs > fs_filter: #1070 is the total number of samples, an represents the number of chromosomes in the record
             return False
         return True
 
@@ -150,18 +152,3 @@ if __name__ == '__main__':
     if args.fischer_strand:
         fs_filter  = args.fischer_strand
 
-    '''
-    Analysis of runtime: generating our database based on populations takes O(n * m * 18) where 
-    n = number of row and m = number of columns. The constant 18 comes from populations.py, at worst to find the populations
-    our for loop will have to execute the entire way through (however this will almost never happen).
-    
-    Generating the new vcf requires us to make another pass through the original vcf and compare it to the data we generated. So we must again 
-    go through each line of the vcf (n) and then walk through every chromosome in our database by population (m). So another n*m.
-    
-    Our approximate runtime is therefore O(2n * 2m) = O(n*m).
-    
-    Storage:
-    Since we are using generators to iterate over the file our memory is being consumed by our database which hold every population and chromosome
-    so O(n*m) storage. When generating the new vcf we also take into one line to check the an value however it is constant so O(1) storage.
-     
-    '''
