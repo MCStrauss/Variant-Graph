@@ -10,7 +10,7 @@ from populations import populations
 chromosome = namedtuple('chromosome', ['chrom', 'position'])
 fs_filter = 10 #default filter value for fischer strand
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
-parser.add_argument('-an', '--an_cutoff', help = 'AN count must represent certain %% of total', type = float)
+parser.add_argument('-an', '--an_cutoff', help = 'AN count must represent certain %% of total', type = float) #how good the site is overall
 
 parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local allelic frequency. '
                     'If a read has no sample with greater than x%% then '
