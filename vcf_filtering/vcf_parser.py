@@ -131,7 +131,7 @@ class Parser:
         :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor allelic
         frequency above .05% or the argument the user specified, relies on two helpers function filter_local_frequency and filter_AAN.
         '''
-        with open('vcf.txt') as input, open(name, 'w') as out:
+        with open('vcf.txt', 'r') as input, open(name, 'w') as out:
             for line in input:
                 if line.startswith('#'):
                     out.write(f'{line}')
