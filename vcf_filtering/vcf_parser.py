@@ -16,11 +16,12 @@ parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local
 
 parser.add_argument('-p', '--population', help = 'If -p is specified an output file with population and '
                                                  'their minor allelic frequencies is outputed', action = 'store_true')
+
 parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
-                                                       'if it is less than the cutoff it will not be included in the filtered vcf')
+                                                       'if it is less than the cutoff it will not be included in the filtered vcf', type = float)
 
 parser.add_argument('-fs', '--fischer_strand', help = 'value to filter fischer strand on, if the fischer strand on an '
-                                                      'chromosome is larger than the fs, it will be filtered out', type  = int)
+                                                      'chromosome is larger than the fs, it will be filtered out', type  = float)
 args = parser.parse_args()
 
 def check():
@@ -28,7 +29,6 @@ def check():
     if args.allelic_frequency: assert 0 <= args.allelic_frequency < 1, 'allelic_frequency must be atleast 0 and greater than 1'
     if args.fischer_strand: assert args.fischer_strand > 0 , 'fischer strand filter must be greater than 0'
     if args.global_frequency: assert 0 < args.global_frequency <1, 'global frequency must be between 0 and 1'
-
 
 class Parser:
     def __init__(self, vcf_reader):
@@ -89,18 +89,31 @@ class Parser:
         if (an / 2) / 1070 < self.an_cutoff or fs > self.fs_filter: #1070 is the total number of samples, an represents the number of chromosomes in the record
             return False
         return True
+
     def filter_line(self, record):
         '''
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
-        #complement_local = 1 -
-        #complement_global = 1 -
-        if max(record.aaf) > self.glob_frequency_filter:
-            return True
+        '''
+        global_mut = max(record.aaf)
+        if global_mut > .5:
+            global_mut = 1 - global_mut
+
+        def consider_complement(population):
+            if self.dB[population].freq > .5:
+                self.dB[population].freq = 1 - self.dB[population.freq]
+                   these will handle complements if either global or local are above 50%
+       
+        '''
+
+
+
 
         for population in self.dB:
             #print(population, self.dB[population])
+
+
 
             loc_freq = self.dB[population].freq
 
@@ -115,7 +128,7 @@ class Parser:
         :return: returns nothing, this generates our dB,
         '''
 
-        aaf = max(record.aaf) #global minor allelic frequency
+        aaf = max(record.aaf) #global alternate allele freq
 
         for sample in record.samples:
 
@@ -129,6 +142,24 @@ class Parser:
                     else:
                         self.dB[pop] = Frequency(aaf, ref = x, alt = y) #needs to be initialized in the dB
                         break
+            self.check_right_maf()  #makes sure the minor allelic freq is actually the minor allelic frequency
+
+        return
+
+    def check_right_maf(self):
+
+        for pop, freq_object in self.dB.items():
+            glob_freq = self.dB[pop].gaaf
+
+            if glob_freq > .5:
+                glob_freq = 1 - glob_freq # global allelic frequency possbile
+
+                self.dB[pop].gaaf = glob_freq
+            if self.dB[pop].freq > .5:
+
+                major_allelic_freq = self.dB[pop].freq # major allelic frequency possible
+
+                self.dB[pop].freq = 1 - major_allelic_freq
         return
 
     def write_data(self, record):
@@ -138,7 +169,7 @@ class Parser:
                 output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.freq)}\t ')
             output.write('\n')
 
-    def generate_filtered_vcf(self, name = 'second_new_vcf.txt'):
+    def generate_filtered_vcf(self, name = 'second1_new_vcf.txt'):
         '''
         :param name: name of the new vcf.txt
         :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor allelic
@@ -159,8 +190,8 @@ class Parser:
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
                         out.write(f'{line}')
 
-                    if args.population:
-                        self.write_data(record)
+                        if args.population:
+                            self.write_data(record)
 
                     self.dB.clear()
 
@@ -168,13 +199,9 @@ class Parser:
 
 if __name__ == '__main__':
     check() #checks to make sure args are valid if there are args
-
     vcf_reader = vcf.Reader(open('vcf.txt', 'r'))
-
     parse = Parser(vcf_reader)
-
     parse.get_arguments()
-
     parse.generate_filtered_vcf()
 
 
