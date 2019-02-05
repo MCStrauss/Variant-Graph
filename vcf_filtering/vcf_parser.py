@@ -148,18 +148,17 @@ class Parser:
 
     def check_right_maf(self):
 
-        for pop, freq_object in self.dB.items():
+        for pop in self.dB:
             glob_freq = self.dB[pop].gaaf
 
             if glob_freq > .5:
                 glob_freq = 1 - glob_freq # global allelic frequency possbile
-
                 self.dB[pop].gaaf = glob_freq
-            if self.dB[pop].freq > .5:
 
+            if self.dB[pop].freq > .5: #checks if its a major allele
                 major_allelic_freq = self.dB[pop].freq # major allelic frequency possible
-
                 self.dB[pop].freq = 1 - major_allelic_freq
+
         return
 
     def write_data(self, record):
