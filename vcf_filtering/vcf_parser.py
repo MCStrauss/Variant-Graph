@@ -82,7 +82,7 @@ class Parser:
         :param line: a row in a vcf file
         :return:  if the an doesn't have the desired number of samples we want remove the row from our new vcf file.
         '''
-        #todo filter on fs
+
         fs = eval(''.join([x for x in line.split(';')[5:7] if x.startswith('FS')]).split('=')[1]) #grabs fischer strand
         an = eval(line.split(';')[2].split('=')[1])  # grabs the an from the line
 
@@ -95,32 +95,14 @@ class Parser:
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
-        '''
-        global_mut = max(record.aaf)
-        if global_mut > .5:
-            global_mut = 1 - global_mut
-
-        def consider_complement(population):
-            if self.dB[population].freq > .5:
-                self.dB[population].freq = 1 - self.dB[population.freq]
-                   these will handle complements if either global or local are above 50%
-       
-        '''
-
-
-
-
+        glob_freq = self.dB['North America'].gaaf # minor allelic frequency relative to all populations on chrom, position
+        #it will be the same on any individual population because it is calculated across the entire chrom, position
         for population in self.dB:
-            #print(population, self.dB[population])
-
-
-
-            loc_freq = self.dB[population].freq
-
-            if loc_freq >= self.f_maf:
-                # todo if the loc_freq is > .05 or glob_freq > .05
+            loc_freq = self.dB[population].freq # minor allelic frequency relative to population on chrom, position
+            if loc_freq >= self.f_maf or glob_freq >= self.glob_frequency_filter:
                 return True
 
+        print('blah' * 10)
         return False
 
     def gen_record_data(self,record):
@@ -142,7 +124,6 @@ class Parser:
                     else:
                         self.dB[pop] = Frequency(aaf, ref = x, alt = y) #needs to be initialized in the dB
                         break
-            self.check_right_maf()  #makes sure the minor allelic freq is actually the minor allelic frequency
 
         return
 
@@ -184,7 +165,11 @@ class Parser:
 
                     record = next(self.vcf_reader) #todo stop iteration
 
-                    self.gen_record_data(record)
+                    self.gen_record_data(record) #generate the data
+
+                    self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
+
+
 
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
                         out.write(f'{line}')
@@ -193,8 +178,6 @@ class Parser:
                             self.write_data(record)
 
                     self.dB.clear()
-
-
 
 if __name__ == '__main__':
     check() #checks to make sure args are valid if there are args
