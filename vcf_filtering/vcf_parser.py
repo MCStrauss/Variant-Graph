@@ -165,7 +165,6 @@ class Parser:
                     self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
 
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
-                        print(self.dB)
                         out.write(f'{line}')
 
                         if args.population:
