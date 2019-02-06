@@ -95,15 +95,16 @@ class Parser:
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
-        glob_freq = self.dB['North America'].gaaf # minor allelic frequency relative to all populations on chrom, position
+        glob_freq = max(record.aaf) # minor allelic frequency relative to all populations on chrom, position
         #it will be the same on any individual population because it is calculated across the entire chrom, position
+
         for population in self.dB:
             loc_freq = self.dB[population].freq # minor allelic frequency relative to population on chrom, position
             if loc_freq >= self.f_maf or glob_freq >= self.glob_frequency_filter:
                 return True
         return False
 
-    def gen_record_data(self,record):
+    def gen_record_data(self, record):
         '''
         :return: returns nothing, this generates our dB,
         '''
