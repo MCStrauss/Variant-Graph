@@ -40,9 +40,9 @@ class Parser:
         self.vcf_reader = vcf_reader
         self.dB = {} #key = populations val = Frequency object
         self.an_cutoff = .5
-        self.f_maf = .05
+        self.f_maf = .05 # threshold to filter line in reference to a individual population
         self.fs_filter = 10  # default filter value for fischer strand
-        self.glob_frequency_filter = .05
+        self.glob_frequency_filter = .05 # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
 
     def get_arguments(self):
 
@@ -95,12 +95,17 @@ class Parser:
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
-        glob_freq = max(record.aaf) # minor allelic frequency relative to all populations on chrom, position
-        #it will be the same on any individual population because it is calculated across the entire chrom, position
+        if max(record.aaf) > .5:  # global minor allele is uniform across populations
+            glob_freq = 1 - max(record.aaf)
+        else:
+            glob_freq = max(record.aaf)
+
+        if glob_freq >= self.glob_frequency_filter:
+            return True
 
         for population in self.dB:
-            loc_freq = self.dB[population].freq # minor allelic frequency relative to population on chrom, position
-            if loc_freq >= self.f_maf or glob_freq >= self.glob_frequency_filter:
+            loc_freq = self.dB[population].minor_freq # minor allelic frequency relative to population on chrom, position
+            if loc_freq >= self.f_maf:
                 return True
         return False
 
@@ -108,9 +113,6 @@ class Parser:
         '''
         :return: returns nothing, this generates our dB,
         '''
-
-        gaaf = max(record.aaf) #global alternate allele freq
-
         for sample in record.samples:
 
             x, y = self.parse(sample['GT'])
@@ -118,32 +120,37 @@ class Parser:
             for func, pop in populations.items(): #populations is a dictionary of functions and values where the values are our samples and the functions determine which sample corresponds to the sample header from the vcf.
                 if func(sample.sample):
                     if pop in self.dB:
-                        self.dB[pop].update(ref = x, alt = y) #already in the dB
+                        self.dB[pop].update(ref = x, alt = y) #already in the dB, update it
                         break
                     else:
-                        self.dB[pop] = Frequency(gaaf, ref = x, alt = y) #needs to be initialized in the dB
+                        self.dB[pop] = Frequency(ref = x, alt = y) #needs to be initialized in the dB
                         break
 
         return
 
     def check_right_maf(self):
+        '''
+        checks that each minor allelic frequency is less than 50%, if not reverses it by subtracting it from 1
+        :return: None
+        '''
 
-        if self.dB['North America'].gaaf > .5: #global minor allele is uniform across populations
-            for pop in self.dB:
-                self.dB[pop].gaaf = 1 - self.dB[pop].gaaf
-
-        for pop in self.dB: #checks each population individually to check it has the minor allele
-            if self.dB[pop].freq > .5:
-                major_allelic_freq = self.dB[pop].freq
-                self.dB[pop].freq = 1 - major_allelic_freq
+        for pop in self.dB:
+            if self.dB[pop].minor_freq > .5:
+                major_allelic = self.dB[pop].minor_freq
+                self.dB[pop].minor_freq = 1 - major_allelic
 
         return
 
     def write_data(self, record):
+        if max(record.aaf) > .5:  # global minor allele is uniform across populations
+            glob_freq = 1 - max(record.aaf)
+        else:
+            glob_freq = max(record.aaf)
+
         with open('populations.txt', 'a') as output:
-            output.write(record.CHROM + '\t' + str(record.POS) +'\t' + f'global_frequency = {str(max(record.aaf))}\t')
+            output.write(record.CHROM + '\t' + str(record.POS) +'\t' + f'global_frequency = {str(glob_freq)}\t')
             for population, value in self.dB.items():
-                output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.freq)}\t ')
+                output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.minor_freq)}\t ')
             output.write('\n')
 
     def generate_filtered_vcf(self, name = 'filtered_vcf.vcf'):
@@ -164,6 +171,7 @@ class Parser:
 
                     self.gen_record_data(record) #generates the data
                     self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
+
 
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
                         out.write(f'{line}')
