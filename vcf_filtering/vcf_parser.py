@@ -101,8 +101,6 @@ class Parser:
             loc_freq = self.dB[population].freq # minor allelic frequency relative to population on chrom, position
             if loc_freq >= self.f_maf or glob_freq >= self.glob_frequency_filter:
                 return True
-
-        print('blah' * 10)
         return False
 
     def gen_record_data(self,record):
@@ -110,7 +108,7 @@ class Parser:
         :return: returns nothing, this generates our dB,
         '''
 
-        aaf = max(record.aaf) #global alternate allele freq
+        gaaf = max(record.aaf) #global alternate allele freq
 
         for sample in record.samples:
 
@@ -122,22 +120,20 @@ class Parser:
                         self.dB[pop].update(ref = x, alt = y) #already in the dB
                         break
                     else:
-                        self.dB[pop] = Frequency(aaf, ref = x, alt = y) #needs to be initialized in the dB
+                        self.dB[pop] = Frequency(gaaf, ref = x, alt = y) #needs to be initialized in the dB
                         break
 
         return
 
     def check_right_maf(self):
 
-        for pop in self.dB:
-            glob_freq = self.dB[pop].gaaf
+        if self.dB['North America'].gaaf > .5: #global minor allele is uniform across populations
+            for pop in self.dB:
+                self.dB[pop].gaaf = 1 - self.dB[pop].gaaf
 
-            if glob_freq > .5:
-                glob_freq = 1 - glob_freq # global allelic frequency possbile
-                self.dB[pop].gaaf = glob_freq
-
-            if self.dB[pop].freq > .5: #checks if its a major allele
-                major_allelic_freq = self.dB[pop].freq # major allelic frequency possible
+        for pop in self.dB: #checks each population individually to check it has the minor allele
+            if self.dB[pop].freq > .5:
+                major_allelic_freq = self.dB[pop].freq
                 self.dB[pop].freq = 1 - major_allelic_freq
 
         return
@@ -149,7 +145,7 @@ class Parser:
                 output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.freq)}\t ')
             output.write('\n')
 
-    def generate_filtered_vcf(self, name = 'second1_new_vcf.txt'):
+    def generate_filtered_vcf(self, name = 'filtered_vcf.vcf'):
         '''
         :param name: name of the new vcf.txt
         :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor allelic
@@ -165,13 +161,11 @@ class Parser:
 
                     record = next(self.vcf_reader) #todo stop iteration
 
-                    self.gen_record_data(record) #generate the data
-
+                    self.gen_record_data(record) #generates the data
                     self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
 
-
-
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
+                        print(self.dB)
                         out.write(f'{line}')
 
                         if args.population:

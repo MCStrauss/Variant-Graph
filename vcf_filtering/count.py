@@ -5,7 +5,7 @@ class Frequency:
         self.ref = ref #number of reads in support of reference
         self.alt = alt #number of reads in support of alternative
         self.get_freq()
-        self.gaaf = gaaf  #aaf = alternate allele frequency
+        self.gaaf = gaaf  #global minor allele frequency
 
 
     def update(self, ref = 0, alt = 0):
@@ -17,8 +17,7 @@ class Frequency:
         try:
             self.freq = self.alt / (self.ref + self.alt)
         except ZeroDivisionError:
-            self.freq = 0 #minor allelic frequency
-
+            self.freq = 0 # local minor allele frequency
     def __repr__(self):
         #for debugging purposes
         return f'{self.__class__.__name__}(ref {self.ref}, alt {self.alt}, maf = {self.freq}, gaf {self.gaaf})'
