@@ -2,7 +2,7 @@ import vcf
 import argparse
 from count import Frequency
 from populations import populations
-
+import os
 
 #todo filter on 10% and 1%
 
@@ -12,16 +12,18 @@ parser.add_argument('-an', '--an_cutoff', help = 'AN count must represent certai
 
 parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local allelic frequency. '
                     'If a read has no sample with greater than x%% then '
-                    'it is removed \n from the vcf. ', type = float)
+                    'it is removed \n from the vcf. ', type = float, required = True)
 
 parser.add_argument('-p', '--population', help = 'If -p is specified an output file with population and '
                                                  'their minor allelic frequencies is outputed', action = 'store_true')
 
 parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
-                                                       'if it is less than the cutoff it will not be included in the filtered vcf', type = float)
+                                                       'if it is less than the cutoff it will not be included in the filtered vcf', type = float, required = True)
 
 parser.add_argument('-fs', '--fischer_strand', help = 'value to filter fischer strand on, if the fischer strand on an '
                                                       'chromosome is larger than the fs, it will be filtered out', type  = float)
+parser.add_argument('-n', '--name', help = 'Name of VCF files to be filtered, can input multiple files', required = True, nargs = '+')
+
 args = parser.parse_args()
 
 def check():
@@ -31,7 +33,7 @@ def check():
     if args.global_frequency: assert 0 < args.global_frequency <1, 'global frequency must be between 0 and 1'
 
 class Parser:
-    def __init__(self, vcf_reader):
+    def __init__(self, vcf_reader, name, direct):
         '''
         :param vcf_reader: the vcf file we will be iterating over
         :param f_aan: cutoff for mininum number of alleles
@@ -40,9 +42,14 @@ class Parser:
         self.vcf_reader = vcf_reader
         self.dB = {} #key = populations val = Frequency object
         self.an_cutoff = .5
-        self.f_maf = .05 # threshold to filter line in reference to a individual population
+        self.f_maf = .05 # threshold to filter for minor allele
         self.fs_filter = 10  # default filter value for fischer strand
         self.glob_frequency_filter = .05 # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
+
+        self.read_from = name #read from this file
+        self.output = f'filtered_{name}_maf{self.f_maf}_g{self.glob_frequency_filter}.vcf'  #name of generated VCF
+        self.path  = direct + '/' + self.output
+
 
     def get_arguments(self):
 
@@ -51,6 +58,9 @@ class Parser:
 
         if args.global_frequency:
             self.glob_frequency_filter = args.global_frequency
+
+        if args.allelic_frequency:
+            self.f_maf = args.allelic_frequency
 
         if args.fischer_strand:
             self.fs_filter = args.fischer_strand
@@ -153,13 +163,13 @@ class Parser:
                 output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.minor_freq)}\t ')
             output.write('\n')
 
-    def generate_filtered_vcf(self, name = 'filtered_vcf.vcf'):
+    def generate_filtered_vcf(self):
         '''
         :param name: name of the new vcf.txt
-        :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor allelic
+        :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor alleliccd
         frequency above .05% or the argument the user specified, relies on two helpers function filter_local_frequency and filter_AAN.
         '''
-        with open('vcf.txt', 'r') as input, open(name, 'w') as out:
+        with open(self.read_from, 'r') as input, open(self.path, 'w') as out:
 
             for line in input:
                 if line.startswith('#'):
@@ -183,10 +193,16 @@ class Parser:
 
 if __name__ == '__main__':
     check() #checks to make sure args are valid if there are args
-    vcf_reader = vcf.Reader(open('vcf.txt', 'r'))
-    parse = Parser(vcf_reader)
-    parse.get_arguments()
-    parse.generate_filtered_vcf()
+    direct = f'filtered_maf-{args.allelic_frequency}_global-{args.global_frequency}'
+
+    if not os.path.exists(direct):
+        os.mkdir(direct)
+
+    for name in args.name:
+        vcf_reader = vcf.Reader(open(name, 'r'))
+        parse = Parser(vcf_reader, name, direct)
+        parse.get_arguments()
+        parse.generate_filtered_vcf()
 
 
 
