@@ -33,6 +33,7 @@ def check():
     if args.global_frequency: assert 0 < args.global_frequency <1, 'global frequency must be between 0 and 1'
 
 class Parser:
+
     def __init__(self, vcf_reader, name, direct):
         '''
         :param vcf_reader: the vcf file we will be iterating over
@@ -42,12 +43,13 @@ class Parser:
         self.vcf_reader = vcf_reader
         self.dB = {} #key = populations val = Frequency object
         self.an_cutoff = .5
-        self.f_maf = .05 # threshold to filter for minor allele
+        self.f_maf = args.allelic_frequency# threshold to filter for minor allele
         self.fs_filter = 10  # default filter value for fischer strand
-        self.glob_frequency_filter = .05 # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
+        self.glob_frequency_filter = args.global_frequency # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
+        self.directory = direct
 
         self.read_from = name #read from this file
-        self.output = f'filtered_{name}_maf{self.f_maf}_g{self.glob_frequency_filter}.vcf'  #name of generated VCF
+        self.output = f'filtered_{name}.vcf'  #name of generated VCF
         self.path  = direct + '/' + self.output
 
 
@@ -55,12 +57,6 @@ class Parser:
 
         if args.fischer_strand:
             self.fs_filter = args.fischer_strand
-
-        if args.global_frequency:
-            self.glob_frequency_filter = args.global_frequency
-
-        if args.allelic_frequency:
-            self.f_maf = args.allelic_frequency
 
         if args.fischer_strand:
             self.fs_filter = args.fischer_strand
@@ -157,7 +153,7 @@ class Parser:
         else:
             glob_freq = max(record.aaf)
 
-        with open('populations.txt', 'a') as output:
+        with open(self.directory + '/' + 'populations_' + self.read_from , 'a') as output:
             output.write(record.CHROM + '\t' + str(record.POS) +'\t' + f'global_frequency = {str(glob_freq)}\t')
             for population, value in self.dB.items():
                 output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.minor_freq)}\t ')
