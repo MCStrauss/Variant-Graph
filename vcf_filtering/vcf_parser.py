@@ -200,5 +200,7 @@ if __name__ == '__main__':
         parse.get_arguments()
         parse.generate_filtered_vcf()
 
+    os.system(f'chmod -R g+w {direct}')
+
 
 
