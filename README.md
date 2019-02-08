@@ -4,7 +4,7 @@
 Working on combining VCFS for drosophila chromosomes to build a VG graph.
 
 
-#Directories
+# Directories
     1.) job_makers contains scripts to generate jobs for the hummingbird cluster
     2.) vcf_filtering contains scripts to filter vcf's made by job_makers
 
@@ -38,5 +38,5 @@ Arguments:
 
 
 
-#Team
+# Team
 Alex Petrusca, Cade Mirchandani, and Marcus Strauss working under professor Corbett Detig
