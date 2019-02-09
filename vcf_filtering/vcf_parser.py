@@ -3,6 +3,7 @@ import argparse
 from count import Frequency
 from populations import populations
 import os
+import csv
 
 #todo filter on 10% and 1%
 
@@ -22,9 +23,13 @@ parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the
 
 parser.add_argument('-fs', '--fischer_strand', help = 'value to filter fischer strand on, if the fischer strand on an '
                                                       'chromosome is larger than the fs, it will be filtered out', type  = float)
+
 parser.add_argument('-n', '--name', help = 'Name of VCF files to be filtered, can input multiple files', required = True, nargs = '+')
 
 args = parser.parse_args()
+
+fieldnames = ['CHROM', 'POSITION', 'Population', 'Global Minor Allelic Frequency', 'Reference Count',
+                          'Alternative Count', 'Local Minor Allelic Frequency']
 
 def check():
     if args.an_cutoff: assert 0 <= args.an_cutoff < 1, 'an_cutoff must be atleast 0 and greater than 1'
@@ -49,8 +54,11 @@ class Parser:
         self.directory = direct
 
         self.read_from = name #read from this file
-        self.output = f'filtered_{name}.vcf'  #name of generated VCF
+        self.output = f'filtered_{name}'  #name of generated VCF
         self.path  = direct + '/' + self.output
+
+
+
 
 
     def get_arguments(self):
@@ -152,12 +160,16 @@ class Parser:
             glob_freq = 1 - max(record.aaf)
         else:
             glob_freq = max(record.aaf)
+        out = self.directory + '/' + 'populations_' + self.read_from.replace('.vcf', '.csv')
 
-        with open(self.directory + '/' + 'populations_' + self.read_from , 'a') as output:
-            output.write(record.CHROM + '\t' + str(record.POS) +'\t' + f'global_frequency = {str(glob_freq)}\t')
-            for population, value in self.dB.items():
-                output.write(population + '\t' + f'ref = {str(value.ref)}\t alt = {str(value.alt)}\t min_freq = {str(value.minor_freq)}\t ')
-            output.write('\n')
+        with open(out, mode='a') as csv_file:
+            for population in self.dB:
+                population_writer = csv.DictWriter(csv_file, fieldnames = fieldnames, delimiter='\t')
+                population_writer.writerow({'CHROM': record.CHROM, 'POSITION': record.POS, 'Population': population,
+                                            'Global Minor Allelic Frequency': str(glob_freq), 'Reference Count': str(self.dB[population].ref),
+                                            'Alternative Count': str(self.dB[population].alt),
+                                            'Local Minor Allelic Frequency': str(self.dB[population].minor_freq),})
+
 
     def generate_filtered_vcf(self):
         '''
@@ -198,6 +210,14 @@ if __name__ == '__main__':
         vcf_reader = vcf.Reader(open(name, 'r'))
         parse = Parser(vcf_reader, name, direct)
         parse.get_arguments()
+
+        if args.population:
+            csv_file = direct + '/' + 'populations_'  + name.replace('.vcf','.csv')
+            f = open(csv_file, 'w')
+            population_writer = csv.DictWriter(f, fieldnames= fieldnames, delimiter='\t')
+            population_writer.writeheader()
+            f.close()
+
         parse.generate_filtered_vcf()
 
     os.system(f'chmod -R g+w {direct}')
