@@ -48,11 +48,24 @@ Arguments:
 [PyVCF](https://pyvcf.readthedocs.io/en/latest/)
 
 ## Team
-Alex Petrusca, Cade Mirchandani, and Marcus Strauss working under professor Corbett-Detig
+Alex Petrusca, Cade Mirchandani, and Marcus Strauss working under professor [Russ Corbett-Detig](https://corbett.ucsc.edu)
 
 
 ## Acknowledgements
-[Russ Corbett-Detig](https://corbett.ucsc.edu)
 
-Andrew Gejelsteen
-(insert other lab members todo later)
+Andrew Gjelsteen
+
+Jesper Svedberg
+
+Joseph Yull
+
+Evan Pepper
+
+Paloma Medina
+
+Bryan Thornlow
+
+Landen Gozashti
+
+
+
