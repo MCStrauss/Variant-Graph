@@ -13,7 +13,7 @@ into account when aligning reads and not possibly discarding it as a linear refe
     + job_makers contains scripts to generate jobs for the hummingbird cluster
     + vcf_filtering contains scripts to filter vcf's made by job_makers
     
-##Directions for running vcf_parser
+### Directions for running vcf_parser
 
 `python3 vcf_parser.py` (see Arguments)
 
@@ -35,7 +35,11 @@ Arguments:
     ** Optional **
     
     -an (called Chromosomes) if the percentage of chromosomes called is below this value then the line is filtered out
+    
+    
     -fs (Fischer strand) if the fs value is above the argument the line is filtered out
+    
+    
     -p if p is specified then a text file is outputted with all the lines that were not filtered, with the following fields, deliminated by tabs
         (CHROM) (POSITION) (global minor allele frequency) (Population) (# alleles for reference) (# alleles for alternative) (population minor allele frequency)
         
@@ -48,8 +52,8 @@ Arguments:
 [PyVCF](https://pyvcf.readthedocs.io/en/latest/)
 
 ## Team
-Alex Petrusca, Cade Mirchandani, and Marcus Strauss working under professor [Russ Corbett-Detig](https://corbett.ucsc.edu)
 
+Cade Mirchandani and Marcus Strauss working under professor [Russ Corbett-Detig](https://corbett.ucsc.edu)
 
 ## Acknowledgements
 
@@ -67,5 +71,6 @@ Bryan Thornlow
 
 Landen Gozashti
 
+[Alex Petrusca](https://alexpetrusca.github.io)
 
 
