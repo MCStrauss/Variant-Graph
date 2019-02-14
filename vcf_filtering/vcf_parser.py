@@ -4,7 +4,6 @@ from count import Frequency
 from populations import populations
 import os
 import csv
-import subprocess
 from itertools import dropwhile
 
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
@@ -240,23 +239,8 @@ if __name__ == '__main__':
 
         parse.generate_filtered_vcf()
 
-
-
     os.system(f'chmod -R g+w {direct}') #gives  read write to directory for group
 
-    os.chdir(direct)
-    vcfs = subprocess.getoutput('ls')
-
-    f = open('header.txt', 'w')
-    f.write(header)
-    f.close()
-
-    for vcf in vcfs.split(): #have to grep each vcf individually, kept putting in the filename
-        cmd = f'grep -v \# {vcf} >> temp_merged.vcf'
-        os.system(cmd)
-
-    os.system(f'cat header.txt temp_merged.vcf > merged_all.vcf')
-    os.system('rm header.txt temp_merged.vcf')
 
 
 
