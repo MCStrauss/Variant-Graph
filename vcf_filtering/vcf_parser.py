@@ -4,32 +4,48 @@ from count import Frequency
 from populations import populations
 import os
 import csv
-
-#todo filter on 10% and 1%
+import subprocess
+from itertools import dropwhile
 
 parser = argparse.ArgumentParser(description  = 'Arguments for VCF filter script')
 
-parser.add_argument('-an', '--an_cutoff', help = 'AN count must represent certain %% of total', type = float) #how good the site is overall
+parser.add_argument('-an', '--an_cutoff',
+                    help = 'AN count must represent certain %% of total',
+                    type = float) #how good the site is overall
 
-parser.add_argument('-af', '--allelic_frequency', help = '%% to filter for local allelic frequency. '
+parser.add_argument('-af', '--allelic_frequency',
+                    help = '%% to filter for local allelic frequency. '
                     'If a read has no sample with greater than x%% then '
-                    'it is removed \n from the vcf. ', type = float, required = True)
+                    'it is removed \n from the vcf. ',
+                    type = float, required = True)
 
-parser.add_argument('-p', '--population', help = 'If -p is specified an output file with population and '
-                                                 'their minor allelic frequencies is outputed', action = 'store_true')
+parser.add_argument('-p', '--population',
+                    help = 'If -p is specified an output file with population and '
+                            'their minor allelic frequencies is outputed',
+                    action = 'store_true')
 
-parser.add_argument('-g', '--global_frequency', help = 'gives the cutoff for the global frequency of a position on the chromosome,'
-                                                       'if it is less than the cutoff it will not be included in the filtered vcf', type = float, required = True)
+parser.add_argument('-g', '--global_frequency',
+                    help = 'gives the cutoff for the global frequency of a position on the chromosome,'
+                            'if it is less than the cutoff it will not be included in the filtered vcf',
+                    type = float,
+                    required = True)
 
-parser.add_argument('-fs', '--fischer_strand', help = 'value to filter fischer strand on, if the fischer strand on an '
-                                                      'chromosome is larger than the fs, it will be filtered out', type  = float)
+parser.add_argument('-fs', '--fischer_strand',
+                    help = 'value to filter fischer strand on, if the fischer strand on an '
+                            'chromosome is larger than the fs, it will be filtered out',
+                    type  = float)
 
-parser.add_argument('-n', '--name', help = 'Name of VCF files to be filtered, can input multiple files', required = True, nargs = '+')
+parser.add_argument('-n', '--name',
+                    help = 'Name of VCF files to be filtered, can input multiple files',
+                    required = True,
+                    nargs = '+')
 
 args = parser.parse_args()
 
 fieldnames = ['CHROM', 'POSITION', 'Population', 'Global Minor Allelic Frequency', 'Reference Count',
                           'Alternative Count', 'Local Minor Allelic Frequency']
+
+header = ''
 
 def check():
     if args.an_cutoff: assert 0 <= args.an_cutoff < 1, 'an_cutoff must be atleast 0 and greater than 1'
@@ -179,9 +195,12 @@ class Parser:
         '''
         with open(self.read_from, 'r') as input, open(self.path, 'w') as out:
 
-            for line in input:
+            for line in dropwhile(lambda x: x.startswith('##'), input):
+
                 if line.startswith('#'):
                     out.write(f'{line}')
+                    global header
+                    header = line
                 else:
                     split = line.split('\t') #fischer strand
 
@@ -190,7 +209,6 @@ class Parser:
                     self.gen_record_data(record) #generates the data
                     self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
 
-
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
                         out.write(f'{line}')
 
@@ -198,6 +216,8 @@ class Parser:
                             self.write_data(record)
 
                     self.dB.clear()
+
+
 
 if __name__ == '__main__':
     check() #checks to make sure args are valid if there are args
@@ -220,7 +240,24 @@ if __name__ == '__main__':
 
         parse.generate_filtered_vcf()
 
-    os.system(f'chmod -R g+w {direct}')
+
+
+    os.system(f'chmod -R g+w {direct}') #gives  read write to directory for group
+
+    os.chdir(direct)
+    vcfs = subprocess.getoutput('ls')
+
+    f = open('header.txt', 'w')
+    f.write(header)
+    f.close()
+
+    for vcf in vcfs.split(): #have to grep each vcf individually, kept putting in the filename
+        cmd = f'grep -v \# {vcf} >> temp_merged.vcf'
+        os.system(cmd)
+
+    os.system(f'cat header.txt temp_merged.vcf > merged_all.vcf')
+    os.system('rm header.txt temp_merged.vcf')
+
 
 
 
