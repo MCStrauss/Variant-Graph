@@ -2,7 +2,7 @@
 
 ## Goal
 Working on combining VCFS for Drosophila chromosomes to build a VG graph that will allow for a new reference genome that encapsulates the genetic
-variation of the Drosophila population.. Built by researchers from the UCSC genomics institute and 
+variation of the Drosophila population. Built by researchers from the UCSC genomics institute and 
 Sanger institute [VG](https://github.com/vgteam/vg)  takes VCFS and a reference genome and builds a graph that
 captures the genetic variation of by having multiple "paths" so that if a minor allele exists it takes it
 into account when aligning reads and not possibly discarding it as a linear reference does.
