@@ -72,10 +72,6 @@ class Parser:
         self.output = f'filtered_{name}'  #name of generated VCF
         self.path  = direct + '/' + self.output
 
-
-
-
-
     def get_arguments(self):
 
         if args.fischer_strand:
@@ -124,10 +120,12 @@ class Parser:
         :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
         :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
         '''
-        if max(record.aaf) > .5:  # global minor allele is uniform across populations
-            glob_freq = 1 - max(record.aaf)
-        else:
-            glob_freq = max(record.aaf)
+        #if max(record.aaf) > .5:  # global minor allele is uniform across populations
+         #   glob_freq = 1 - max(record.aaf)
+        #else:
+
+
+        glob_freq = max(record.aaf)
 
         if glob_freq >= self.glob_frequency_filter:
             return True
@@ -206,7 +204,7 @@ class Parser:
                     record = next(self.vcf_reader) #todo stop iteration
 
                     self.gen_record_data(record) #generates the data
-                    self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
+                    # self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
 
                     if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
                         out.write(f'{line}')
@@ -216,10 +214,8 @@ class Parser:
 
                     self.dB.clear()
 
-
-
 if __name__ == '__main__':
-    check() #checks to make sure args are valid if there are args
+    check() # checks to make sure args are valid if there are args
     direct = f'filtered_maf-{args.allelic_frequency}_global-{args.global_frequency}'
 
     if not os.path.exists(direct):
@@ -239,7 +235,7 @@ if __name__ == '__main__':
 
         parse.generate_filtered_vcf()
 
-    os.system(f'chmod -R g+w {direct}') #gives  read write to directory for group
+    os.system(f'chmod -R g+w {direct}') # gives read write to directory for group
 
 
 
