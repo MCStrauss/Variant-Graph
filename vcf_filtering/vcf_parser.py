@@ -54,29 +54,36 @@ def check():
 
 class Parser:
 
-    def __init__(self, vcf_reader, name, direct):
+    def __init__(self, vcf_reader: "pyvcf", name:str, direct:str):
         '''
         :param vcf_reader: the vcf file we will be iterating over
         :param f_aan: cutoff for mininum number of alleles
         :param f_maf: cutoff for minor allelic frequency
         '''
+        ####FOR PYVCF#####
         self.vcf_reader = vcf_reader
-        self.dB = {} #key = populations val = Frequency object
-        self.an_cutoff = .5
-        self.f_maf = args.allelic_frequency# threshold to filter for minor allele
-        self.fs_filter = 10  # default filter value for fischer strand
-        self.glob_frequency_filter = args.global_frequency # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
-        self.directory = direct
 
+        ###DATABASE#####
+        self.dB = {} #key = populations val = Frequency object
+
+        ######DEFAULT ARGUMENTS#########
+        self.an_cutoff = .5
+        self.fs_filter = 10  # default filter value for fischer strand
+
+        ######## NAMED ARGUMENT S#############
+        self.f_maf = args.allelic_frequency# threshold to filter for minor allele
+        self.glob_frequency_filter = args.global_frequency # threshold the filter a line in referenece to the minor allelic frequency fo the entire line
+
+        #### STUFF FOR GENERATING NEW DIRECTOR Y#####
+        self.directory = direct
         self.read_from = name #read from this file
         self.output = f'filtered_{name}'  #name of generated VCF
         self.path  = direct + '/' + self.output
 
-    def get_arguments(self):
-
-        if args.fischer_strand:
-            self.fs_filter = args.fischer_strand
-
+    def get_arguments(self) -> None:
+        '''
+        :return: Sets user arguments (Fischer strand, and an cutoff) to class attributes
+        '''
         if args.fischer_strand:
             self.fs_filter = args.fischer_strand
 
@@ -84,7 +91,7 @@ class Parser:
             self.an_cutoff = args.an_cutoff
 
     @staticmethod
-    def parse(data):
+    def parse(data:str) -> tuple:
         '''
         :param data: data will be in the form '#/#'
         :return: if there is atleast one '.' the read is bad and do not increment either the ref or alt.
@@ -102,7 +109,7 @@ class Parser:
         else:
             return (1, 0)
 
-    def filter_AN_FS(self, line):
+    def filter_AN_FS(self, line) -> bool:
         '''
         :param line: a row in a vcf file
         :return:  if the an doesn't have the desired number of samples we want remove the row from our new vcf file.
@@ -115,28 +122,21 @@ class Parser:
             return False
         return True
 
-    def filter_line(self, record):
-        '''
-        :param chrom: given the (chrom, position) check everywhere it occured and its minor allelic frequency.
-        :return: If it has a minor allelic frequency of atleast our cutoff keep it in, else remove the line from our filtered VCF.
-        '''
-        #if max(record.aaf) > .5:  # global minor allele is uniform across populations
-         #   glob_freq = 1 - max(record.aaf)
-        #else:
+    def filter_line(self) -> bool:
+      '''
+      :param record: record generated from pyvcf
+      :return:  bool on whether to keep the line or not depending on global/minor aaf
+      '''
 
-
-        glob_freq = max(record.aaf)
-
-        if glob_freq >= self.glob_frequency_filter:
+      if self.glob_freq >= self.glob_frequency_filter:
+          return True
+      for population in self.dB:
+        loc_freq = self.dB[population].minor_freq # minor allelic frequency relative to population on chrom, position
+        if loc_freq >= self.f_maf:
             return True
-
-        for population in self.dB:
-            loc_freq = self.dB[population].minor_freq # minor allelic frequency relative to population on chrom, position
-            if loc_freq >= self.f_maf:
-                return True
         return False
 
-    def gen_record_data(self, record):
+    def gen_record_data(self, record:"pyvcf") -> None:
         '''
         :return: returns nothing, this generates our dB,
         '''
@@ -155,40 +155,26 @@ class Parser:
 
         return
 
-    def check_right_maf(self):
+
+    def write_data(self, record: "pyvcf") -> None:
         '''
-        checks that each minor allelic frequency is less than 50%, if not reverses it by subtracting it from 1
-        :return: None
+        :param record: Given from pyvcf
+        :return: Returns nothing just outputting CSV formmated data on populations we kept in VCF
         '''
 
-        for pop in self.dB:
-            if self.dB[pop].minor_freq > .5:
-                major_allelic = self.dB[pop].minor_freq
-                self.dB[pop].minor_freq = 1 - major_allelic
-
-        return
-
-    def write_data(self, record):
-        if max(record.aaf) > .5:  # global minor allele is uniform across populations
-            glob_freq = 1 - max(record.aaf)
-        else:
-            glob_freq = max(record.aaf)
         out = self.directory + '/' + 'populations_' + self.read_from.replace('.vcf', '.csv')
-
         with open(out, mode='a') as csv_file:
             for population in self.dB:
                 population_writer = csv.DictWriter(csv_file, fieldnames = fieldnames, delimiter='\t')
                 population_writer.writerow({'CHROM': record.CHROM, 'POSITION': record.POS, 'Population': population,
-                                            'Global Minor Allelic Frequency': str(glob_freq), 'Reference Count': str(self.dB[population].ref),
+                                            'Global Minor Allelic Frequency': str(self.glob_freq), 'Reference Count': str(self.dB[population].ref),
                                             'Alternative Count': str(self.dB[population].alt),
                                             'Local Minor Allelic Frequency': str(self.dB[population].minor_freq),})
 
 
-    def generate_filtered_vcf(self):
+    def generate_filtered_vcf(self) -> None:
         '''
-        :param name: name of the new vcf.txt
-        :return: will generate a filtered vcf if it fits aan parameters and atleast 1 chromosome has an minor alleliccd
-        frequency above .05% or the argument the user specified, relies on two helpers function filter_local_frequency and filter_AAN.
+        :return: Generates new filtered vcf based on user inputs (arguments) in a new directory based on cwd
         '''
         with open(self.read_from, 'r') as input, open(self.path, 'w') as out:
 
@@ -203,10 +189,11 @@ class Parser:
 
                     record = next(self.vcf_reader) #todo stop iteration
 
-                    self.gen_record_data(record) #generates the data
-                    # self.check_right_maf()  # makes sure the minor allelic freq is actually the minor allelic frequency
+                    self.glob_freq = max(record.aaf) #gets global minor allele freq
 
-                    if self.filter_AN_FS(split[7]) and self.filter_line(record): #gets chrom name as string and position as int
+                    self.gen_record_data(record) #generates the data
+
+                    if self.filter_AN_FS(split[7]) and self.filter_line(): #gets chrom name as string and position as int
                         out.write(f'{line}')
 
                         if args.population:
@@ -219,7 +206,10 @@ if __name__ == '__main__':
     direct = f'filtered_maf-{args.allelic_frequency}_global-{args.global_frequency}'
 
     if not os.path.exists(direct):
-        os.mkdir(direct)
+        try:
+            os.mkdir(direct)
+        except FileExistsError:
+            pass  # slurm executed the jobs at the same time
 
     for name in args.name:
         vcf_reader = vcf.Reader(open(name, 'r'))
